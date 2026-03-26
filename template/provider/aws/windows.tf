@@ -22,9 +22,9 @@ variable "vm_config" {
 
 resource "aws_network_interface" "goad-vm-nic" {
   for_each = var.vm_config
-  subnet_id   = aws_subnet.goad_private_network.id
+  subnet_id   = {% if use_existing_vpc %}var.existing_subnet_id{% else %}aws_subnet.goad_private_network.id{% endif %}
   private_ips = [each.value.private_ip_address]
-  security_groups = [aws_security_group.goad_security_group.id]
+  security_groups = [{% if use_existing_vpc %}var.existing_security_group_id{% else %}aws_security_group.goad_security_group.id{% endif %}]
   tags = {
     Lab = "{{lab_identifier}}"
   }
