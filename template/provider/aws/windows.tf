@@ -30,10 +30,55 @@ resource "aws_network_interface" "goad-vm-nic" {
   }
 }
 
+data "aws_ami" "windows_2016" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2016-English-Full-Base*"]
+  }
+}
+
+data "aws_ami" "windows_2019" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2019-English-Full-Base*"]
+  }
+}
+
+data "aws_ami" "windows_2022" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2022-English-Full-Base*"]
+  }
+}
+
+data "aws_ami" "windows_2025" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2025-English-Full-Base*"]
+  }
+}
+
+locals {
+  ami_lookup = {
+    "2016-Datacenter" = data.aws_ami.windows_2016.id
+    "2019-Datacenter" = data.aws_ami.windows_2019.id
+    "2022-Datacenter" = data.aws_ami.windows_2022.id
+    "2025-Datacenter" = data.aws_ami.windows_2025.id
+  }
+}
+
 resource "aws_instance" "goad-vm" {
   for_each = var.vm_config
 
-  ami                    = each.value.ami
+  ami                    = lookup(local.ami_lookup, each.value.windows_sku, each.value.ami)
   instance_type          = each.value.instance_type
 
   network_interface {

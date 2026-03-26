@@ -30,11 +30,20 @@ resource "aws_network_interface" "linux-goad-vm-nic" {
   }
 }
 
+data "aws_ami" "ubuntu_22_04_linux" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+}
+
 resource "aws_instance" "linux-goad-vm" {
   for_each = var.linux_vm_config
 
-  ami                    = "${each.value.ami}"
-  instance_type          = "${each.value.instance_type}"
+  ami                    = data.aws_ami.ubuntu_22_04_linux.id
+  instance_type          = each.value.instance_type
 
   network_interface {
     network_interface_id = aws_network_interface.linux-goad-vm-nic[each.key].id
